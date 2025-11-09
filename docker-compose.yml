@@ -1,1 +1,4 @@
-services:\n  db:\n    image: postgres:16\n    environment:\n      POSTGRES_USER: fd_user\n      POSTGRES_PASSWORD: fd_pass\n      POSTGRES_DB: food_delivery\n    ports:\n      - "5432:5432"\n    volumes:\n      - pgdata:/var/lib/postgresql/data\n    healthcheck:\n      test: ["CMD-SHELL", "pg_isready -U fd_user"]\n      interval: 5s\n      timeout: 5s\n      retries: 10\n\n  adminer:\n    image: adminer:4\n    ports:\n      - "8080:8080"\n    depends_on:\n      - db\n\n  api:\n    build: .\n    environment:\n      PORT: 4000\n      JWT_SECRET: supersecretjwt_change_me\n      DATABASE_URL: postgresql://fd_user:fd_pass@db:5432/food_delivery?schema=public\n      CACHE_TTL_SECONDS: 60\n    ports:\n      - "4000:4000"\n    depends_on:\n      db:\n        condition: service_healthy\n\nvolumes:\n  pgdata:\n
+  adminer:
+    image: adminer:4
+    ports:
+      - "8090:8080"   # use 8090 instead
