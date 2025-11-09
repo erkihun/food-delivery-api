@@ -1,1 +1,64 @@
-name: CI\n\non:\n  push:\n    branches: [ main, master ]\n  pull_request:\n    branches: [ main, master ]\n\njobs:\n  test:\n    runs-on: ubuntu-latest\n    services:\n      postgres:\n        image: postgres:16\n        env:\n          POSTGRES_USER: fd_user\n          POSTGRES_PASSWORD: fd_pass\n          POSTGRES_DB: food_delivery\n        ports:\n          - 5432:5432\n        options: >-\n          --health-cmd="pg_isready -U fd_user" \n          --health-interval=5s \n          --health-timeout=5s \n          --health-retries=10\n\n    steps:\n      - uses: actions/checkout@v4\n\n      - name: Setup Node\n        uses: actions/setup-node@v4\n        with:\n          node-version: 20\n          cache: 'npm'\n\n      - name: Install dependencies\n        run: npm ci\n\n      - name: Generate Prisma Client\n        run: npx prisma generate\n\n      - name: Wait for DB\n        run: |\n          for i in {1..30}; do\n            pg_isready -h localhost -p 5432 -U fd_user && break\n            echo "Waiting for postgres... ($i)"\n            sleep 2\n          done\n\n      - name: Run migrations\n        env:\n          DATABASE_URL: postgresql://fd_user:fd_pass@localhost:5432/food_delivery?schema=public\n        run: npx prisma migrate deploy\n\n      - name: Seed database\n        env:\n          DATABASE_URL: postgresql://fd_user:fd_pass@localhost:5432/food_delivery?schema=public\n        run: node -e "require('ts-node/register'); require('./prisma/seed.ts')"\n\n      - name: Run tests\n        env:\n          DATABASE_URL: postgresql://fd_user:fd_pass@localhost:5432/food_delivery?schema=public\n          JWT_SECRET: testsecret\n          CACHE_TTL_SECONDS: 1\n        run: npm test\n
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: fd_user
+          POSTGRES_PASSWORD: fd_pass
+          POSTGRES_DB: food_delivery
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U fd_user"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      DATABASE_URL: postgresql://fd_user:fd_pass@localhost:5432/food_delivery?schema=public
+      JWT_SECRET: testsecret
+      CACHE_TTL_SECONDS: 1
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Wait for Postgres
+        run: |
+          for i in {1..30}; do
+            pg_isready -h localhost -p 5432 -U fd_user && break
+            echo "Waiting for postgres... ($i)"
+            sleep 2
+          done
+
+      - name: Run migrations
+        run: npx prisma migrate deploy
+
+      - name: Seed database
+        run: npx ts-node prisma/seed.ts
+
+      - name: Run tests
+        run: npm test
