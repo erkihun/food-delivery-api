@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from '../../src/app';
+import app from '../../src/app.js';
 
 describe('Orders: place', () => {
   it('places an order as a newly registered customer', async () => {

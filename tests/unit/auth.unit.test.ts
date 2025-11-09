@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from '../../src/app';
+import app from '../../src/app.js';
 
 describe('Auth: register', () => {
   it('registers a new customer and returns a JWT', async () => {

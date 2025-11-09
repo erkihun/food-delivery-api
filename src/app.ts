@@ -22,7 +22,7 @@ app.use('/docs', swaggerRouter);
 app.use('/auth', authRoutes);
 app.use('/users', usersRoutes);
 app.use('/restaurants', restaurantsRoutes);
-app.use('/', menuRoutes);        // exposes /restaurants/:id/menu and /menu/:id
+app.use('/', menuRoutes);        
 app.use('/orders', ordersRoutes);
 
 app.use(errorHandler);

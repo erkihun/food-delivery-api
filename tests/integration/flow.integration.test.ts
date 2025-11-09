@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from '../../src/app';
+import app from '../../src/app.js';
 
 describe('Flow: register → login → place order', () => {
   it('completes the happy path', async () => {

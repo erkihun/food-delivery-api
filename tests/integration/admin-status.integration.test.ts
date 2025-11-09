@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from '../../src/app';
+import app from '../../src/app.js';
 
 async function adminToken(){
   const res = await request(app).post('/auth/login').send({ email: 'admin@example.com', password: 'Admin@123' });

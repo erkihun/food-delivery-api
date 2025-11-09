@@ -3,7 +3,6 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// Use string unions instead of importing Prisma enums (avoids client-gen/type issues)
 type Status = 'PENDING' | 'PREPARING' | 'DELIVERED';
 
 export async function placeOrder(req: Request, res: Response) {
@@ -16,7 +15,7 @@ export async function placeOrder(req: Request, res: Response) {
   if (!restaurantId || !Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ message: 'Invalid payload' });
   }
-  // basic quantity validation
+
   for (const it of items) {
     if (
       !it ||
@@ -28,8 +27,7 @@ export async function placeOrder(req: Request, res: Response) {
     }
   }
 
-  // Optional: ensure all menu items exist (and belong to the restaurant)
-  // Not mandatory for tests, but safer.
+
   const uniqueIds = [...new Set(items.map(i => i.menuItemId))];
   const menuItems = await prisma.menuItem.findMany({
     where: { id: { in: uniqueIds }, restaurantId }
@@ -91,7 +89,6 @@ export async function updateOrderStatus(req: Request, res: Response) {
 
   const current = order.status as Status;
 
-  // allowed transitions
   const validNext: Record<Status, Status | null> = {
     PENDING: 'PREPARING',
     PREPARING: 'DELIVERED',
