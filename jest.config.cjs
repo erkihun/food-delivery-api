@@ -1,19 +1,14 @@
-// Jest config compatible with "type": "module" and TypeScript
 module.exports = {
-  preset: 'ts-jest/presets/default-esm',
+  preset: 'ts-jest',
   testEnvironment: 'node',
-  roots: ['<rootDir>/tests'],
-  testMatch: ['**/?(*.)+(test).[tj]s?(x)'],
-  transform: {
-    '^.+\\.ts$': [
-      'ts-jest',
-      {
-        useESM: true,
-        tsconfig: 'tsconfig.json',
-      },
-    ],
+  // ADD THIS:
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1', // let TS/Jest resolve .ts when import path ends with .js
   },
-  extensionsToTreatAsEsm: ['.ts'],
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'mjs', 'cjs', 'json'],
-  verbose: true,
+  // (optional) quiet the TS151002 warning here too
+  globals: {
+    'ts-jest': {
+      diagnostics: { ignoreCodes: [151002] },
+    },
+  },
 };
