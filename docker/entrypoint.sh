@@ -1,0 +1,1 @@
+#!/usr/bin/env bash\nset -e\necho "Running Prisma migrations..."\nnpx prisma migrate deploy\necho "Seeding database (if configured)..."\nif [ -f prisma/seed.ts ]; then node -e "require('ts-node/register'); require('./prisma/seed.ts')" || true; fi\necho "Starting server..."\nnode dist/server.js\n

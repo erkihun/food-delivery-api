@@ -1,0 +1,174 @@
+openapi: 3.0.3
+info:
+  title: Food Delivery API
+  version: 1.0.0
+servers:
+  - url: http://localhost:4000
+paths:
+  /auth/register:
+    post:
+      summary: Register customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name,email,password]
+              properties:
+                name: { type: string }
+                email: { type: string }
+                password: { type: string }
+      responses:
+        '201': { description: Created }
+  /auth/login:
+    post:
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email,password]
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        '200': { description: OK }
+  /users:
+    get:
+      security: [ { bearerAuth: [] } ]
+      summary: List users (admin)
+      responses:
+        '200': { description: OK }
+  /users/{id}:
+    get:
+      security: [ { bearerAuth: [] } ]
+      summary: Get user (self or admin)
+      parameters: [ { in: path, name: id, required: true, schema: { type: integer } } ]
+      responses:
+        '200': { description: OK }
+    patch:
+      security: [ { bearerAuth: [] } ]
+      summary: Update user (self or admin)
+      parameters: [ { in: path, name: id, required: true, schema: { type: integer } } ]
+      responses:
+        '200': { description: OK }
+    delete:
+      security: [ { bearerAuth: [] } ]
+      summary: Delete user (admin)
+      parameters: [ { in: path, name: id, required: true, schema: { type: integer } } ]
+      responses:
+        '204': { description: No Content }
+  /restaurants:
+    get:
+      summary: List restaurants (cached 60s)
+      responses: { '200': { description: OK } }
+    post:
+      security: [ { bearerAuth: [] } ]
+      summary: Create restaurant (admin)
+      responses: { '201': { description: Created } }
+  /restaurants/{id}:
+    get:
+      summary: Get restaurant
+      parameters: [ { in: path, name: id, required: true, schema: { type: integer } } ]
+      responses: { '200': { description: OK } }
+    patch:
+      security: [ { bearerAuth: [] } ]
+      summary: Update restaurant (admin)
+      parameters: [ { in: path, name: id, required: true, schema: { type: integer } } ]
+      responses: { '200': { description: OK } }
+    delete:
+      security: [ { bearerAuth: [] } ]
+      summary: Delete restaurant (admin)
+      parameters: [ { in: path, name: id, required: true, schema: { type: integer } } ]
+      responses: { '204': { description: No Content } }
+  /restaurants/{id}/menu:
+    get:
+      summary: List menu items for restaurant
+      parameters: [ { in: path, name: id, required: true, schema: { type: integer } } ]
+      responses: { '200': { description: OK } }
+    post:
+      security: [ { bearerAuth: [] } ]
+      summary: Add menu item (admin)
+      parameters: [ { in: path, name: id, required: true, schema: { type: integer } } ]
+      responses: { '201': { description: Created } }
+  /menu/{id}:
+    get:
+      summary: Get menu item
+      parameters: [ { in: path, name: id, required: true, schema: { type: integer } } ]
+      responses: { '200': { description: OK } }
+    patch:
+      security: [ { bearerAuth: [] } ]
+      summary: Update menu item (admin)
+      parameters: [ { in: path, name: id, required: true, schema: { type: integer } } ]
+      responses: { '200': { description: OK } }
+    delete:
+      security: [ { bearerAuth: [] } ]
+      summary: Delete menu item (admin)
+      parameters: [ { in: path, name: id, required: true, schema: { type: integer } } ]
+      responses: { '204': { description: No Content } }
+  /orders:
+    get:
+      security: [ { bearerAuth: [] } ]
+      summary: List orders (admin all, customer own)
+      responses: { '200': { description: OK } }
+    post:
+      security: [ { bearerAuth: [] } ]
+      summary: Place order (customer)
+      responses: { '201': { description: Created } }
+  /orders/{id}:
+    get:
+      security: [ { bearerAuth: [] } ]
+      summary: Get order
+      parameters: [ { in: path, name: id, required: true, schema: { type: integer } } ]
+      responses: { '200': { description: OK } }
+    delete:
+      security: [ { bearerAuth: [] } ]
+      summary: Cancel order (customer before delivered or admin)
+      parameters: [ { in: path, name: id, required: true, schema: { type: integer } } ]
+      responses: { '204': { description: No Content } }
+  /orders/{id}/status:
+    patch:
+      security: [ { bearerAuth: [] } ]
+      summary: Update order status (admin only)
+      parameters: [ { in: path, name: id, required: true, schema: { type: integer } } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [PENDING, PREPARING, DELIVERED]
+      responses: { '200': { description: OK } }
+  /orders/{id}/items:
+    get:
+      security: [ { bearerAuth: [] } ]
+      summary: List order items
+      parameters: [ { in: path, name: id, required: true, schema: { type: integer } } ]
+      responses: { '200': { description: OK } }
+  /orders/{id}/items/{itemId}:
+    patch:
+      security: [ { bearerAuth: [] } ]
+      summary: Update quantity (customer only if pending)
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: integer } }
+        - { in: path, name: itemId, required: true, schema: { type: integer } }
+      responses: { '200': { description: OK } }
+    delete:
+      security: [ { bearerAuth: [] } ]
+      summary: Remove item (customer only if pending)
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: integer } }
+        - { in: path, name: itemId, required: true, schema: { type: integer } }
+      responses: { '204': { description: No Content } }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
