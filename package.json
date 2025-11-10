@@ -2,15 +2,25 @@
   "name": "food-delivery-api",
   "version": "1.0.0",
   "type": "module",
+
+  "prisma": {
+    "seed": "node --loader ts-node/esm prisma/seed.ts"
+  },
+
   "scripts": {
     "dev": "node --loader ts-node/esm --no-warnings=ExperimentalWarning src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
+
+    "postinstall": "prisma generate",
     "prisma:gen": "prisma generate",
-    "prisma:migrate": "prisma migrate dev --name init",
-    "prisma:seed": "ts-node prisma/seed.ts",
-    "test": "jest --config jest.config.cjs"
+    "prisma:migrate": "prisma migrate deploy",
+    "prisma:seed": "prisma db seed",
+
+    "test": "jest --config jest.config.cjs",
+    "test:ci": "jest --config jest.config.cjs --runInBand"
   },
+
   "dependencies": {
     "@prisma/client": "^5.19.0",
     "apicache": "^1.6.3",
@@ -22,6 +32,7 @@
     "swagger-ui-express": "^5.0.1",
     "yamljs": "^0.3.0"
   },
+
   "devDependencies": {
     "@types/apicache": "^1.6.7",
     "@types/bcryptjs": "^2.4.2",
@@ -40,14 +51,10 @@
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.6.3"
+    "typescript": "^5.9.3"
   },
-  "description": "",
-  "main": "index.js",
-  "directories": {
-    "test": "tests"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+
+  "engines": {
+    "node": ">=18.17"
+  }
 }
